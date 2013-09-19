@@ -1,5 +1,6 @@
 require 'treetop'
 require 'csv_parser/version'
+require 'csv_parser/parser_extensions'
 
 module CsvParser
 end

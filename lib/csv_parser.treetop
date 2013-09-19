@@ -1,5 +1,7 @@
 module CsvParser
   grammar Csv
+    include ParserExtensions
+
     rule records
       first:non_empty_record rest:( record_sep record )*
       {
@@ -63,7 +65,7 @@ module CsvParser
     end
 
     rule quoted_text
-      quote (!quote .)+ quote
+      quote ( !quote . )+ quote
     end
 
     rule unquoted_text
@@ -71,7 +73,7 @@ module CsvParser
     end
 
     rule field_sep
-      ','
+      . &{ |s| s[0].text_value == field_sep }
     end
 
     rule record_sep

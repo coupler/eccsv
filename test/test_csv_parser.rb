@@ -41,4 +41,12 @@ class TestCsvParser < Test::Unit::TestCase
     assert result, error
     assert_equal [["foo,bar"]], result.value
   end
+
+  test "custom field separator" do
+    parser = CsvParser::CsvParser.new
+    parser.field_sep = "\t"
+    result = parser.parse("foo\tbar")
+    assert result, parser.failure_reason
+    assert_equal [['foo', 'bar']], result.value
+  end
 end
