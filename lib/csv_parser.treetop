@@ -1,15 +1,60 @@
 module CsvParser
   grammar Csv
     rule records
-      ( record ( record_sep record )* )?
+      first:record rest:( record_sep record )*
+      {
+        def value
+          arr = [first.value]
+          rest.elements.each do |elt|
+            arr << elt.record.value
+          end
+          arr
+        end
+      }
+      /
+      ''
+      {
+        def value
+          []
+        end
+      }
     end
 
     rule record
-      ( field ( field_sep field )* )?
+      first:field rest:( field_sep field )*
+      {
+        def value
+          arr = [first.value]
+          rest.elements.each do |elt|
+            arr << elt.field.value
+          end
+          arr
+        end
+      }
     end
 
     rule field
-      ( !field_sep !record_sep . )+
+      quoted_text
+      {
+        def value
+          elements[1..-2].map(&:text_value).join
+        end
+      }
+      /
+      unquoted_text
+      {
+        def value
+          elements.map(&:text_value).join
+        end
+      }
+    end
+
+    rule quoted_text
+      quote (!quote .)+ quote
+    end
+
+    rule unquoted_text
+      ( !field_sep !record_sep !quote . )+
     end
 
     rule field_sep
@@ -18,6 +63,10 @@ module CsvParser
 
     rule record_sep
       "\n"
+    end
+
+    rule quote
+      !"\\" '"'
     end
   end
 end

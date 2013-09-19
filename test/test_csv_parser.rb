@@ -1,25 +1,38 @@
 require 'helper'
 
 class TestCsvParser < Test::Unit::TestCase
-  def assert_parseable(string)
+  def parse(string)
     parser = CsvParser::CsvParser.new
-    result = parser.parse(string)
-    assert result, parser.failure_reason
+    [parser.parse(string), parser.failure_reason]
   end
 
   test "one record with two fields" do
-    assert_parseable "foo,bar"
+    result, error = parse("foo,bar")
+    assert result, error
+    assert_equal [['foo', 'bar']], result.value
   end
 
   test "one record with one field" do
-    assert_parseable "foo"
+    result, error = parse("foo")
+    assert result, error
+    assert_equal [['foo']], result.value
   end
 
   test "empty record" do
-    assert_parseable ""
+    result, error = parse("")
+    assert result, error
+    assert_equal [], result.value
   end
 
   test "two records" do
-    assert_parseable "foo,bar\nbaz,qux"
+    result, error = parse("foo,bar\nbaz,qux")
+    assert result, error
+    assert_equal [['foo', 'bar'], ['baz', 'qux']], result.value
+  end
+
+  test "quoted field" do
+    result, error = parse(%{"foo,bar"})
+    assert result, error
+    assert_equal [["foo,bar"]], result.value
   end
 end
