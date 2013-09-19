@@ -1,7 +1,7 @@
 module CsvParser
   grammar Csv
     rule records
-      first:record rest:( record_sep record )*
+      first:non_empty_record rest:( record_sep record )*
       {
         def value
           arr = [first.value]
@@ -21,6 +21,19 @@ module CsvParser
     end
 
     rule record
+      non_empty_record / empty_record
+    end
+
+    rule empty_record
+      ''
+      {
+        def value
+          []
+        end
+      }
+    end
+
+    rule non_empty_record
       first:field rest:( field_sep field )*
       {
         def value

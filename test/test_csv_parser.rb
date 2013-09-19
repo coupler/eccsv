@@ -18,10 +18,16 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [['foo']], result.value
   end
 
-  test "empty record" do
+  test "empty records" do
     result, error = parse("")
     assert result, error
     assert_equal [], result.value
+  end
+
+  test "empty record" do
+    result, error = parse("foo\n\nbar")
+    assert result, error
+    assert_equal [['foo'], [], ['bar']], result.value
   end
 
   test "two records" do
