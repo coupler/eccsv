@@ -1,5 +1,7 @@
-require "csv_parser/version"
+require 'treetop'
+require 'csv_parser/version'
 
 module CsvParser
-  # Your code goes here...
 end
+
+Treetop.load(File.join(File.dirname(__FILE__), 'csv_parser.treetop'))

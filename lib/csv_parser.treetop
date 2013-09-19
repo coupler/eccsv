@@ -1,0 +1,23 @@
+module CsvParser
+  grammar Csv
+    rule records
+      ( record ( record_sep record )* )?
+    end
+
+    rule record
+      ( field ( field_sep field )* )?
+    end
+
+    rule field
+      ( !field_sep !record_sep . )+
+    end
+
+    rule field_sep
+      ','
+    end
+
+    rule record_sep
+      "\n"
+    end
+  end
+end
