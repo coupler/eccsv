@@ -63,9 +63,11 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal :stray_quote, parser.failure_description
   end
 
-  test "missing fields is okay by default" do
-    result, error = parse(%{foo,bar\nbaz})
-    assert result, error
+  test "missing fields gets warning by default" do
+    parser = CsvParser::CsvParser.new
+    result = parser.parse(%{foo,bar\nbaz})
+    assert result, parser.failure_reason
+    assert_equal [[:missing_fields, 2, 4]], parser.warnings
   end
 
   test "missing fields when disallowed" do
@@ -76,9 +78,11 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal :missing_fields, parser.failure_description
   end
 
-  test "extra fields is okay by default" do
-    result, error = parse(%{foo\nbar,baz})
-    assert result, error
+  test "extra fields gets warning by default" do
+    parser = CsvParser::CsvParser.new
+    result = parser.parse(%{foo\nbar,baz})
+    assert result, parser.failure_reason
+    assert_equal [[:extra_fields, 2, 4]], parser.warnings
   end
 
   test "extra fields when disallowed" do

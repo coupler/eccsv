@@ -61,14 +61,19 @@ module CsvParser
 
     rule non_empty_record
       first:field
-      &{ |s| @record_length = 1; true }
+      &{ |s| @record_length = 1; @warning = nil; true }
       rest:(
         &{ |s|
-          if @first_record || allow_uneven_records? || @record_length < @first_record_length
+          if @first_record || @record_length < @first_record_length
             true
           else
-            @failure_description = :extra_fields
-            false
+            if allow_uneven_records?
+              @warning ||= [:extra_fields, input.line_of(index), input.column_of(index)]
+              true
+            else
+              @failure_description = :extra_fields
+              false
+            end
           end
         }
         field_sep
@@ -76,11 +81,19 @@ module CsvParser
         &{ |s| @record_length += 1; true }
       )*
       &{ |s|
-        if @first_record || allow_uneven_records? || @record_length == @first_record_length
+        if @first_record || @record_length >= @first_record_length
+          if @warning
+            warnings << @warning
+          end
           true
         else
-          @failure_description = :missing_fields
-          false
+          if allow_uneven_records?
+            warnings << [:missing_fields, input.line_of(index), input.column_of(index)]
+            true
+          else
+            @failure_description = :missing_fields
+            false
+          end
         end
       }
       {

@@ -404,7 +404,7 @@ module CsvParser
       s0 << r1
       if r1
         i2 = index
-        r3 = lambda { |s| @record_length = 1; true }.call(s0)
+        r3 = lambda { |s| @record_length = 1; @warning = nil; true }.call(s0)
         if r3
           @index = i2
           r2 = instantiate_node(SyntaxNode,input, index...index)
@@ -418,11 +418,16 @@ module CsvParser
             i5, s5 = index, []
             i6 = index
             r7 = lambda { |s|
-                      if @first_record || allow_uneven_records? || @record_length < @first_record_length
+                      if @first_record || @record_length < @first_record_length
                         true
                       else
-                        @failure_description = :extra_fields
-                        false
+                        if allow_uneven_records?
+                          @warning ||= [:extra_fields, input.line_of(index), input.column_of(index)]
+                          true
+                        else
+                          @failure_description = :extra_fields
+                          false
+                        end
                       end
                     }.call(s5)
             if r7
@@ -469,11 +474,19 @@ module CsvParser
           if r4
             i12 = index
             r13 = lambda { |s|
-                    if @first_record || allow_uneven_records? || @record_length == @first_record_length
+                    if @first_record || @record_length >= @first_record_length
+                      if @warning
+                        warnings << @warning
+                      end
                       true
                     else
-                      @failure_description = :missing_fields
-                      false
+                      if allow_uneven_records?
+                        warnings << [:missing_fields, input.line_of(index), input.column_of(index)]
+                        true
+                      else
+                        @failure_description = :missing_fields
+                        false
+                      end
                     end
                   }.call(s0)
             if r13
