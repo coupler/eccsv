@@ -30,6 +30,14 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [['foo'], [], ['bar']], result.value
   end
 
+  test "empty record when disallowed" do
+    parser = CsvParser::CsvParser.new
+    parser.allow_empty_record = false
+    result = parser.parse("foo\n\nbar")
+    assert_nil result
+    assert_equal :missing_fields, parser.failure_description
+  end
+
   test "two records" do
     result, error = parse("foo,bar\nbaz,qux")
     assert result, error
@@ -54,6 +62,13 @@ class TestCsvParser < Test::Unit::TestCase
     result = parser.parse(%{f"oo})
     assert !result
     assert_equal :stray_quote, parser.failure_description
+  end
+
+  test "not enough fields" do
+    parser = CsvParser::CsvParser.new
+    result = parser.parse(%{foo,bar\nbaz})
+    assert !result
+    assert_equal :missing_fields, parser.failure_description
   end
 
   test "single-character custom field separator" do

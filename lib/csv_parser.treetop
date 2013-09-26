@@ -3,7 +3,21 @@ module CsvParser
     include ParserExtensions
 
     rule records
-      first:non_empty_record rest:( record_sep record )*
+      first:non_empty_record
+      &{ |s| @record_length = s[0].value.length; true }
+      rest:(
+        record_sep
+        record
+        &{ |s|
+          len = s[1].value.length
+          if (allow_empty_record? && len == 0) || len == @record_length
+            true
+          else
+            @failure_description = :missing_fields
+            false
+          end
+        }
+      )*
       {
         def value
           arr = [first.value]

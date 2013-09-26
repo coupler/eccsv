@@ -19,6 +19,7 @@ module CsvParser
       def record
         elements[1]
       end
+
     end
 
     module Records1
@@ -27,7 +28,7 @@ module CsvParser
       end
 
       def rest
-        elements[1]
+        elements[2]
       end
     end
 
@@ -63,30 +64,60 @@ module CsvParser
       r2 = _nt_non_empty_record
       s1 << r2
       if r2
-        s3, i3 = [], index
-        loop do
-          i4, s4 = index, []
-          r5 = _nt_record_sep
-          s4 << r5
-          if r5
-            r6 = _nt_record
-            s4 << r6
-          end
-          if s4.last
-            r4 = instantiate_node(SyntaxNode,input, i4...index, s4)
-            r4.extend(Records0)
-          else
-            @index = i4
-            r4 = nil
-          end
-          if r4
-            s3 << r4
-          else
-            break
-          end
+        i3 = index
+        r4 = lambda { |s| @record_length = s[0].value.length; true }.call(s1)
+        if r4
+          @index = i3
+          r3 = instantiate_node(SyntaxNode,input, index...index)
+        else
+          r3 = nil
         end
-        r3 = instantiate_node(SyntaxNode,input, i3...index, s3)
         s1 << r3
+        if r3
+          s5, i5 = [], index
+          loop do
+            i6, s6 = index, []
+            r7 = _nt_record_sep
+            s6 << r7
+            if r7
+              r8 = _nt_record
+              s6 << r8
+              if r8
+                i9 = index
+                r10 = lambda { |s|
+                          len = s[1].value.length
+                          if (allow_empty_record? && len == 0) || len == @record_length
+                            true
+                          else
+                            @failure_description = :missing_fields
+                            false
+                          end
+                        }.call(s6)
+                if r10
+                  @index = i9
+                  r9 = instantiate_node(SyntaxNode,input, index...index)
+                else
+                  r9 = nil
+                end
+                s6 << r9
+              end
+            end
+            if s6.last
+              r6 = instantiate_node(SyntaxNode,input, i6...index, s6)
+              r6.extend(Records0)
+            else
+              @index = i6
+              r6 = nil
+            end
+            if r6
+              s5 << r6
+            else
+              break
+            end
+          end
+          r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
+          s1 << r5
+        end
       end
       if s1.last
         r1 = instantiate_node(SyntaxNode,input, i1...index, s1)
@@ -100,15 +131,15 @@ module CsvParser
         r0 = r1
       else
         if has_terminal?('', false, index)
-          r7 = instantiate_node(SyntaxNode,input, index...(index + 0))
-          r7.extend(Records3)
+          r11 = instantiate_node(SyntaxNode,input, index...(index + 0))
+          r11.extend(Records3)
           @index += 0
         else
           terminal_parse_failure('')
-          r7 = nil
+          r11 = nil
         end
-        if r7
-          r0 = r7
+        if r11
+          r0 = r11
         else
           @index = i0
           r0 = nil
