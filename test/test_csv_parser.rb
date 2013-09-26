@@ -82,7 +82,7 @@ class TestCsvParser < Test::Unit::TestCase
     parser = CsvParser::CsvParser.new
     result = parser.parse(%{foo\nbar,baz})
     assert result, parser.failure_reason
-    assert_equal [[:extra_fields, 2, 4]], parser.warnings
+    assert_equal [[:extra_fields, 2, 5]], parser.warnings
   end
 
   test "extra fields when disallowed" do
@@ -127,18 +127,18 @@ class TestCsvParser < Test::Unit::TestCase
 
   test "parse helper" do
     result = CsvParser.parse("foo,bar")
-    assert_equal [['foo', 'bar']], result
+    assert_equal [['foo', 'bar']], result.data
   end
 
   test "parse helper with options" do
     result = CsvParser.parse("foo\tbar", :field_sep => "\t")
-    assert_equal [['foo', 'bar']], result
+    assert_equal [['foo', 'bar']], result.data
   end
 
   test "parse helper with missing closing quote" do
     error = nil
     begin
-      assert_nil CsvParser.parse(%{"foo})
+      CsvParser.parse(%{"foo})
     rescue CsvParser::MissingQuoteError => error
       assert_equal 1, error.line
       assert_equal 5, error.column
@@ -149,7 +149,7 @@ class TestCsvParser < Test::Unit::TestCase
   test "parse helper with stray quote" do
     error = nil
     begin
-      assert_nil CsvParser.parse(%{f"oo})
+      CsvParser.parse(%{f"oo})
     rescue CsvParser::StrayQuoteError => error
       assert_equal 1, error.line
       assert_equal 2, error.column
@@ -157,10 +157,19 @@ class TestCsvParser < Test::Unit::TestCase
     assert error
   end
 
-  test "parse helper with short records" do
+  test "parse helper with allowed short records" do
+    result = CsvParser.parse(%{foo,bar\nbaz})
+    assert_equal 1, result.warnings.length
+    assert_kind_of CsvParser::MissingFieldsError, result.warnings[0]
+    error = result.warnings[0]
+    assert_equal 2, error.line
+    assert_equal 4, error.column
+  end
+
+  test "parse helper with disallowed short records" do
     error = nil
     begin
-      assert_nil CsvParser.parse(%{foo,bar\nbaz}, :allow_uneven_records => false)
+      CsvParser.parse(%{foo,bar\nbaz}, :allow_uneven_records => false)
     rescue CsvParser::MissingFieldsError => error
       assert_equal 2, error.line
       assert_equal 4, error.column
@@ -168,10 +177,19 @@ class TestCsvParser < Test::Unit::TestCase
     assert error
   end
 
-  test "parse helper with long records" do
+  test "parse helper with allowed long records" do
+    result = CsvParser.parse(%{foo\nbar,baz})
+    assert_equal 1, result.warnings.length
+    assert_kind_of CsvParser::ExtraFieldsError, result.warnings[0]
+    error = result.warnings[0]
+    assert_equal 2, error.line
+    assert_equal 5, error.column
+  end
+
+  test "parse helper with disallowed long records" do
     error = nil
     begin
-      assert_nil CsvParser.parse(%{foo\nbar,baz}, :allow_uneven_records => false)
+      CsvParser.parse(%{foo\nbar,baz}, :allow_uneven_records => false)
     rescue CsvParser::ExtraFieldsError => error
       assert_equal 2, error.line
       assert_equal 5, error.column

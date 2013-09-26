@@ -68,7 +68,7 @@ module CsvParser
             true
           else
             if allow_uneven_records?
-              @warning ||= [:extra_fields, input.line_of(index), input.column_of(index)]
+              @warning ||= [:extra_fields, input.line_of(index + 1), input.column_of(index + 1)]
               true
             else
               @failure_description = :extra_fields

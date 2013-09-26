@@ -2,6 +2,7 @@ require 'treetop'
 
 require 'csv_parser/version'
 require 'csv_parser/parser_extensions'
+require 'csv_parser/result'
 
 #Treetop.load(File.join(File.dirname(__FILE__), 'csv_parser.treetop'))
 require 'csv_parser/csv_parser'
@@ -29,10 +30,19 @@ module CsvParser
     end
     result = parser.parse(data)
     if result
-      result.value
+      warnings = parser.warnings.collect do |(desc, line, col)|
+        error(desc, line, col)
+      end
+      Result.new(result.value, warnings)
     else
+      raise error(parser.failure_description, parser.failure_line,
+                  parser.failure_column, parser.failure_reason)
+    end
+  end
+
+  def self.error(description, line, column, msg = nil)
       klass =
-        case parser.failure_description
+        case description
         when :missing_quote
           MissingQuoteError
         when :stray_quote
@@ -45,8 +55,6 @@ module CsvParser
           Error
         end
 
-      raise klass.new(parser.failure_reason, parser.failure_line,
-                      parser.failure_column)
-    end
+      klass.new(msg, line, column)
   end
 end
