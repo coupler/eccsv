@@ -125,6 +125,14 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [['bar'], ['baz']], result.value
   end
 
+  test "custom quote character" do
+    parser = CsvParser::CsvParser.new
+    parser.quote_char = "'"
+    result = parser.parse("'foo,bar'")
+    assert result, parser.failure_reason
+    assert_equal [['foo,bar']], result.value
+  end
+
   test "parse helper" do
     result = CsvParser.parse("foo,bar")
     assert_equal [['foo', 'bar']], result.data

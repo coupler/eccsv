@@ -1127,14 +1127,25 @@ module CsvParser
       end
       s0 << r1
       if r1
-        if has_terminal?('"', false, index)
+        if index < input_length
           r3 = instantiate_node(SyntaxNode,input, index...(index + 1))
           @index += 1
         else
-          terminal_parse_failure('"')
+          terminal_parse_failure("any character")
           r3 = nil
         end
         s0 << r3
+        if r3
+          i4 = index
+          r5 = lambda { |s| s[1].text_value[0] == quote_char[0] }.call(s0)
+          if r5
+            @index = i4
+            r4 = instantiate_node(SyntaxNode,input, index...index)
+          else
+            r4 = nil
+          end
+          s0 << r4
+        end
       end
       if s0.last
         r0 = instantiate_node(SyntaxNode,input, i0...index, s0)

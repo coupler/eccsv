@@ -200,7 +200,7 @@ module CsvParser
     end
 
     rule quote
-      !"\\" '"'
+      !"\\" . &{ |s| s[1].text_value[0] == quote_char[0] }
     end
   end
 end

@@ -16,6 +16,14 @@ module CsvParser
       @record_sep = str
     end
 
+    def quote_char
+      @quote_char ||= '"'
+    end
+
+    def quote_char=(str)
+      @quote_char = str
+    end
+
     def allow_empty_record?
       if defined? @allow_empty_record
         @allow_empty_record
