@@ -71,6 +71,13 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal :missing_fields, parser.failure_description
   end
 
+  test "extra fields" do
+    parser = CsvParser::CsvParser.new
+    result = parser.parse(%{foo\nbar,baz})
+    assert !result
+    assert_equal :extra_fields, parser.failure_description
+  end
+
   test "single-character custom field separator" do
     parser = CsvParser::CsvParser.new
     parser.field_sep = "\t"
@@ -142,6 +149,17 @@ class TestCsvParser < Test::Unit::TestCase
     rescue CsvParser::MissingFieldsError => error
       assert_equal 2, error.line
       assert_equal 4, error.column
+    end
+    assert error
+  end
+
+  test "parse helper with long records" do
+    error = nil
+    begin
+      assert_nil CsvParser.parse(%{foo\nbar,baz})
+    rescue CsvParser::ExtraFieldsError => error
+      assert_equal 2, error.line
+      assert_equal 5, error.column
     end
     assert error
   end

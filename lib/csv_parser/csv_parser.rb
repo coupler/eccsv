@@ -11,43 +11,6 @@ module CsvParser
 
     include ParserExtensions
 
-    module Records0
-      def record_sep
-        elements[0]
-      end
-
-      def record
-        elements[1]
-      end
-
-    end
-
-    module Records1
-      def first
-        elements[0]
-      end
-
-      def rest
-        elements[2]
-      end
-    end
-
-    module Records2
-      def value
-        arr = [first.value]
-        rest.elements.each do |elt|
-          arr << elt.record.value
-        end
-        arr
-      end
-    end
-
-    module Records3
-      def value
-        []
-      end
-    end
-
     def _nt_records
       start_index = index
       if node_cache[:records].has_key?(index)
@@ -60,86 +23,13 @@ module CsvParser
       end
 
       i0 = index
-      i1, s1 = index, []
-      r2 = _nt_non_empty_record
-      s1 << r2
-      if r2
-        i3 = index
-        r4 = lambda { |s| @record_length = s[0].value.length; true }.call(s1)
-        if r4
-          @index = i3
-          r3 = instantiate_node(SyntaxNode,input, index...index)
-        else
-          r3 = nil
-        end
-        s1 << r3
-        if r3
-          s5, i5 = [], index
-          loop do
-            i6, s6 = index, []
-            r7 = _nt_record_sep
-            s6 << r7
-            if r7
-              r8 = _nt_record
-              s6 << r8
-              if r8
-                i9 = index
-                r10 = lambda { |s|
-                          len = s[1].value.length
-                          if (allow_empty_record? && len == 0) || len == @record_length
-                            true
-                          else
-                            @failure_description = :missing_fields
-                            false
-                          end
-                        }.call(s6)
-                if r10
-                  @index = i9
-                  r9 = instantiate_node(SyntaxNode,input, index...index)
-                else
-                  r9 = nil
-                end
-                s6 << r9
-              end
-            end
-            if s6.last
-              r6 = instantiate_node(SyntaxNode,input, i6...index, s6)
-              r6.extend(Records0)
-            else
-              @index = i6
-              r6 = nil
-            end
-            if r6
-              s5 << r6
-            else
-              break
-            end
-          end
-          r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
-          s1 << r5
-        end
-      end
-      if s1.last
-        r1 = instantiate_node(SyntaxNode,input, i1...index, s1)
-        r1.extend(Records1)
-        r1.extend(Records2)
-      else
-        @index = i1
-        r1 = nil
-      end
+      r1 = _nt_non_empty_records
       if r1
         r0 = r1
       else
-        if has_terminal?('', false, index)
-          r11 = instantiate_node(SyntaxNode,input, index...(index + 0))
-          r11.extend(Records3)
-          @index += 0
-        else
-          terminal_parse_failure('')
-          r11 = nil
-        end
-        if r11
-          r0 = r11
+        r2 = _nt_empty_records
+        if r2
+          r0 = r2
         else
           @index = i0
           r0 = nil
@@ -147,6 +37,250 @@ module CsvParser
       end
 
       node_cache[:records][start_index] = r0
+
+      r0
+    end
+
+    module NonEmptyRecords0
+      def first_record
+        elements[0]
+      end
+
+      def other_records
+        elements[1]
+      end
+    end
+
+    module NonEmptyRecords1
+      def value
+        arr = [first_record.value]
+        arr.push(*other_records.value)
+        arr
+      end
+    end
+
+    def _nt_non_empty_records
+      start_index = index
+      if node_cache[:non_empty_records].has_key?(index)
+        cached = node_cache[:non_empty_records][index]
+        if cached
+          cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+          @index = cached.interval.end
+        end
+        return cached
+      end
+
+      i0, s0 = index, []
+      r1 = _nt_first_record
+      s0 << r1
+      if r1
+        r2 = _nt_other_records
+        s0 << r2
+      end
+      if s0.last
+        r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+        r0.extend(NonEmptyRecords0)
+        r0.extend(NonEmptyRecords1)
+      else
+        @index = i0
+        r0 = nil
+      end
+
+      node_cache[:non_empty_records][start_index] = r0
+
+      r0
+    end
+
+    module EmptyRecords0
+      def value
+        []
+      end
+    end
+
+    def _nt_empty_records
+      start_index = index
+      if node_cache[:empty_records].has_key?(index)
+        cached = node_cache[:empty_records][index]
+        if cached
+          cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+          @index = cached.interval.end
+        end
+        return cached
+      end
+
+      if has_terminal?('', false, index)
+        r0 = instantiate_node(SyntaxNode,input, index...(index + 0))
+        r0.extend(EmptyRecords0)
+        @index += 0
+      else
+        terminal_parse_failure('')
+        r0 = nil
+      end
+
+      node_cache[:empty_records][start_index] = r0
+
+      r0
+    end
+
+    module FirstRecord0
+      def non_empty_record
+        elements[2]
+      end
+
+    end
+
+    module FirstRecord1
+      def value
+        non_empty_record.value
+      end
+    end
+
+    def _nt_first_record
+      start_index = index
+      if node_cache[:first_record].has_key?(index)
+        cached = node_cache[:first_record][index]
+        if cached
+          cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+          @index = cached.interval.end
+        end
+        return cached
+      end
+
+      i0, s0 = index, []
+      if has_terminal?('', false, index)
+        r1 = instantiate_node(SyntaxNode,input, index...(index + 0))
+        @index += 0
+      else
+        terminal_parse_failure('')
+        r1 = nil
+      end
+      s0 << r1
+      if r1
+        i2 = index
+        r3 = lambda { |s| @first_record = true; true }.call(s0)
+        if r3
+          @index = i2
+          r2 = instantiate_node(SyntaxNode,input, index...index)
+        else
+          r2 = nil
+        end
+        s0 << r2
+        if r2
+          r4 = _nt_non_empty_record
+          s0 << r4
+          if r4
+            i5 = index
+            r6 = lambda { |s| @first_record_length = @record_length; true }.call(s0)
+            if r6
+              @index = i5
+              r5 = instantiate_node(SyntaxNode,input, index...index)
+            else
+              r5 = nil
+            end
+            s0 << r5
+          end
+        end
+      end
+      if s0.last
+        r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+        r0.extend(FirstRecord0)
+        r0.extend(FirstRecord1)
+      else
+        @index = i0
+        r0 = nil
+      end
+
+      node_cache[:first_record][start_index] = r0
+
+      r0
+    end
+
+    module OtherRecords0
+      def record_sep
+        elements[0]
+      end
+
+      def record
+        elements[1]
+      end
+    end
+
+    module OtherRecords1
+    end
+
+    module OtherRecords2
+      def value
+        elements[2].elements.collect { |elt| elt.record.value }
+      end
+    end
+
+    def _nt_other_records
+      start_index = index
+      if node_cache[:other_records].has_key?(index)
+        cached = node_cache[:other_records][index]
+        if cached
+          cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+          @index = cached.interval.end
+        end
+        return cached
+      end
+
+      i0, s0 = index, []
+      if has_terminal?('', false, index)
+        r1 = instantiate_node(SyntaxNode,input, index...(index + 0))
+        @index += 0
+      else
+        terminal_parse_failure('')
+        r1 = nil
+      end
+      s0 << r1
+      if r1
+        i2 = index
+        r3 = lambda { |s| @first_record = false; true }.call(s0)
+        if r3
+          @index = i2
+          r2 = instantiate_node(SyntaxNode,input, index...index)
+        else
+          r2 = nil
+        end
+        s0 << r2
+        if r2
+          s4, i4 = [], index
+          loop do
+            i5, s5 = index, []
+            r6 = _nt_record_sep
+            s5 << r6
+            if r6
+              r7 = _nt_record
+              s5 << r7
+            end
+            if s5.last
+              r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
+              r5.extend(OtherRecords0)
+            else
+              @index = i5
+              r5 = nil
+            end
+            if r5
+              s4 << r5
+            else
+              break
+            end
+          end
+          r4 = instantiate_node(SyntaxNode,input, i4...index, s4)
+          s0 << r4
+        end
+      end
+      if s0.last
+        r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+        r0.extend(OtherRecords1)
+        r0.extend(OtherRecords2)
+      else
+        @index = i0
+        r0 = nil
+      end
+
+      node_cache[:other_records][start_index] = r0
 
       r0
     end
@@ -181,45 +315,15 @@ module CsvParser
       r0
     end
 
-    module EmptyRecord0
-      def value
-        []
-      end
-    end
-
-    def _nt_empty_record
-      start_index = index
-      if node_cache[:empty_record].has_key?(index)
-        cached = node_cache[:empty_record][index]
-        if cached
-          cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
-          @index = cached.interval.end
-        end
-        return cached
-      end
-
-      if has_terminal?('', false, index)
-        r0 = instantiate_node(SyntaxNode,input, index...(index + 0))
-        r0.extend(EmptyRecord0)
-        @index += 0
-      else
-        terminal_parse_failure('')
-        r0 = nil
-      end
-
-      node_cache[:empty_record][start_index] = r0
-
-      r0
-    end
-
     module NonEmptyRecord0
       def field_sep
-        elements[0]
+        elements[1]
       end
 
       def field
-        elements[1]
+        elements[2]
       end
+
     end
 
     module NonEmptyRecord1
@@ -228,8 +332,9 @@ module CsvParser
       end
 
       def rest
-        elements[1]
+        elements[2]
       end
+
     end
 
     module NonEmptyRecord2
@@ -257,30 +362,88 @@ module CsvParser
       r1 = _nt_field
       s0 << r1
       if r1
-        s2, i2 = [], index
-        loop do
-          i3, s3 = index, []
-          r4 = _nt_field_sep
-          s3 << r4
+        i2 = index
+        r3 = lambda { |s| @record_length = 1; true }.call(s0)
+        if r3
+          @index = i2
+          r2 = instantiate_node(SyntaxNode,input, index...index)
+        else
+          r2 = nil
+        end
+        s0 << r2
+        if r2
+          s4, i4 = [], index
+          loop do
+            i5, s5 = index, []
+            i6 = index
+            r7 = lambda { |s|
+                      if @first_record || @record_length < @first_record_length
+                        true
+                      else
+                        @failure_description = :extra_fields
+                        false
+                      end
+                    }.call(s5)
+            if r7
+              @index = i6
+              r6 = instantiate_node(SyntaxNode,input, index...index)
+            else
+              r6 = nil
+            end
+            s5 << r6
+            if r6
+              r8 = _nt_field_sep
+              s5 << r8
+              if r8
+                r9 = _nt_field
+                s5 << r9
+                if r9
+                  i10 = index
+                  r11 = lambda { |s| @record_length += 1; true }.call(s5)
+                  if r11
+                    @index = i10
+                    r10 = instantiate_node(SyntaxNode,input, index...index)
+                  else
+                    r10 = nil
+                  end
+                  s5 << r10
+                end
+              end
+            end
+            if s5.last
+              r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
+              r5.extend(NonEmptyRecord0)
+            else
+              @index = i5
+              r5 = nil
+            end
+            if r5
+              s4 << r5
+            else
+              break
+            end
+          end
+          r4 = instantiate_node(SyntaxNode,input, i4...index, s4)
+          s0 << r4
           if r4
-            r5 = _nt_field
-            s3 << r5
-          end
-          if s3.last
-            r3 = instantiate_node(SyntaxNode,input, i3...index, s3)
-            r3.extend(NonEmptyRecord0)
-          else
-            @index = i3
-            r3 = nil
-          end
-          if r3
-            s2 << r3
-          else
-            break
+            i12 = index
+            r13 = lambda { |s|
+                    if @first_record || @record_length == @first_record_length
+                      true
+                    else
+                      @failure_description = :missing_fields
+                      false
+                    end
+                  }.call(s0)
+            if r13
+              @index = i12
+              r12 = instantiate_node(SyntaxNode,input, index...index)
+            else
+              r12 = nil
+            end
+            s0 << r12
           end
         end
-        r2 = instantiate_node(SyntaxNode,input, i2...index, s2)
-        s0 << r2
       end
       if s0.last
         r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
@@ -292,6 +455,67 @@ module CsvParser
       end
 
       node_cache[:non_empty_record][start_index] = r0
+
+      r0
+    end
+
+    module EmptyRecord0
+    end
+
+    module EmptyRecord1
+      def value
+        []
+      end
+    end
+
+    def _nt_empty_record
+      start_index = index
+      if node_cache[:empty_record].has_key?(index)
+        cached = node_cache[:empty_record][index]
+        if cached
+          cached = SyntaxNode.new(input, index...(index + 1)) if cached == true
+          @index = cached.interval.end
+        end
+        return cached
+      end
+
+      i0, s0 = index, []
+      if has_terminal?('', false, index)
+        r1 = instantiate_node(SyntaxNode,input, index...(index + 0))
+        @index += 0
+      else
+        terminal_parse_failure('')
+        r1 = nil
+      end
+      s0 << r1
+      if r1
+        i2 = index
+        r3 = lambda { |s|
+                if allow_empty_record?
+                  true
+                else
+                  @failure_description = :missing_fields
+                  false
+                end
+              }.call(s0)
+        if r3
+          @index = i2
+          r2 = instantiate_node(SyntaxNode,input, index...index)
+        else
+          r2 = nil
+        end
+        s0 << r2
+      end
+      if s0.last
+        r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+        r0.extend(EmptyRecord0)
+        r0.extend(EmptyRecord1)
+      else
+        @index = i0
+        r0 = nil
+      end
+
+      node_cache[:empty_record][start_index] = r0
 
       r0
     end
