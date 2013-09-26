@@ -438,6 +438,9 @@ module CsvParser
     module UnquotedText0
     end
 
+    module UnquotedText1
+    end
+
     def _nt_unquoted_text
       start_index = index
       if node_cache[:unquoted_text].has_key?(index)
@@ -473,29 +476,67 @@ module CsvParser
           s1 << r4
           if r4
             i6 = index
-            r7 = _nt_quote
-            if r7
-              r6 = nil
+            i7 = index
+            r8 = _nt_quote
+            if r8
+              r7 = nil
             else
-              @index = i6
-              r6 = instantiate_node(SyntaxNode,input, index...index)
+              @index = i7
+              r7 = instantiate_node(SyntaxNode,input, index...index)
+            end
+            if r7
+              r6 = r7
+            else
+              i9, s9 = index, []
+              if has_terminal?('', false, index)
+                r10 = instantiate_node(SyntaxNode,input, index...(index + 0))
+                @index += 0
+              else
+                terminal_parse_failure('')
+                r10 = nil
+              end
+              s9 << r10
+              if r10
+                i11 = index
+                r12 = lambda { |s| @failure_description = :stray_quote; true }.call(s9)
+                if r12
+                  r11 = nil
+                else
+                  @index = i11
+                  r11 = instantiate_node(SyntaxNode,input, index...index)
+                end
+                s9 << r11
+              end
+              if s9.last
+                r9 = instantiate_node(SyntaxNode,input, i9...index, s9)
+                r9.extend(UnquotedText0)
+              else
+                @index = i9
+                r9 = nil
+              end
+              if r9
+                r6 = r9
+              else
+                @index = i6
+                r6 = nil
+              end
             end
             s1 << r6
             if r6
               if index < input_length
-                r8 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                r13 = instantiate_node(SyntaxNode,input, index...(index + 1))
                 @index += 1
               else
                 terminal_parse_failure("any character")
-                r8 = nil
+                r13 = nil
               end
-              s1 << r8
+              s1 << r13
             end
           end
         end
         if s1.last
           r1 = instantiate_node(SyntaxNode,input, i1...index, s1)
-          r1.extend(UnquotedText0)
+          r1.extend(UnquotedText1)
         else
           @index = i1
           r1 = nil
