@@ -69,11 +69,26 @@ module CsvParser
     end
 
     rule unquoted_text
-      ( !field_sep !record_sep !quote . )+
+      ( !field_sep !record_sep . )+
     end
 
     rule field_sep
-      . &{ |s| s[0].text_value == field_sep }
+      &{ |s| @field_sep_index = 0; true }
+      (
+        !record_sep
+        !quote
+        .
+        &{ |s|
+          if @field_sep_index < field_sep.length &&
+             s[2].text_value == field_sep[@field_sep_index]
+            @field_sep_index += 1
+            true
+          else
+            false
+          end
+        }
+      )+
+      &{ |s| s.map(&:text_value).join == field_sep }
     end
 
     rule record_sep

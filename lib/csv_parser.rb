@@ -6,3 +6,4 @@ module CsvParser
 end
 
 Treetop.load(File.join(File.dirname(__FILE__), 'csv_parser.treetop'))
+#require 'csv_parser/csv_parser'
