@@ -75,7 +75,16 @@ module CsvParser
     end
 
     rule unquoted_text
-      ( !field_sep !record_sep !quote . )+
+      (
+        !field_sep
+        !record_sep
+        (
+          !quote
+          /
+          '' !{ |s| @failure_description = :stray_quote; true }
+        )
+        .
+      )+
     end
 
     rule field_sep

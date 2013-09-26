@@ -3,8 +3,8 @@ require 'treetop'
 require 'csv_parser/version'
 require 'csv_parser/parser_extensions'
 
-#Treetop.load(File.join(File.dirname(__FILE__), 'csv_parser.treetop'))
-require 'csv_parser/csv_parser'
+Treetop.load(File.join(File.dirname(__FILE__), 'csv_parser.treetop'))
+#require 'csv_parser/csv_parser'
 
 module CsvParser
   class Error < Exception
@@ -17,8 +17,8 @@ module CsvParser
     end
   end
 
-  class MissingQuoteError < Error
-  end
+  class MissingQuoteError < Error; end
+  class StrayQuoteError < Error; end
 
   def self.parse(data, options = {})
     parser = ::CsvParser::CsvParser.new
@@ -33,6 +33,8 @@ module CsvParser
         case parser.failure_description
         when :no_closing_quote
           MissingQuoteError
+        when :stray_quote
+          StrayQuoteError
         else
           Error
         end

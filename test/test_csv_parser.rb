@@ -49,6 +49,13 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal :no_closing_quote, parser.failure_description
   end
 
+  test "quote inside unquoted field" do
+    parser = CsvParser::CsvParser.new
+    result = parser.parse(%{f"oo})
+    assert !result
+    assert_equal :stray_quote, parser.failure_description
+  end
+
   test "single-character custom field separator" do
     parser = CsvParser::CsvParser.new
     parser.field_sep = "\t"
@@ -98,6 +105,17 @@ class TestCsvParser < Test::Unit::TestCase
     rescue CsvParser::MissingQuoteError => error
       assert_equal 1, error.line
       assert_equal 5, error.column
+    end
+    assert error
+  end
+
+  test "parse helper with stray quote" do
+    error = nil
+    begin
+      assert_nil CsvParser.parse(%{f"oo})
+    rescue CsvParser::StrayQuoteError => error
+      assert_equal 1, error.line
+      assert_equal 2, error.column
     end
     assert error
   end
