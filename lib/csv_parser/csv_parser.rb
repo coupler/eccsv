@@ -267,13 +267,13 @@ module CsvParser
 
     module Field0
       def value
-        elements[1..-2].map(&:text_value).join
+        elements.map(&:text_value).join
       end
     end
 
     module Field1
       def value
-        elements.map(&:text_value).join
+        elements[1..-2].map(&:text_value).join
       end
     end
 
@@ -289,12 +289,12 @@ module CsvParser
       end
 
       i0 = index
-      r1 = _nt_quoted_text
+      r1 = _nt_unquoted_text
       r1.extend(Field0)
       if r1
         r0 = r1
       else
-        r2 = _nt_unquoted_text
+        r2 = _nt_quoted_text
         r2.extend(Field1)
         if r2
           r0 = r2
@@ -313,13 +313,13 @@ module CsvParser
     end
 
     module QuotedText1
-      def quote1
+    end
+
+    module QuotedText2
+      def quote
         elements[0]
       end
 
-      def quote2
-        elements[2]
-      end
     end
 
     def _nt_quoted_text
@@ -380,13 +380,51 @@ module CsvParser
         end
         s0 << r2
         if r2
-          r7 = _nt_quote
+          i7 = index
+          r8 = _nt_quote
+          if r8
+            r7 = r8
+          else
+            i9, s9 = index, []
+            if has_terminal?('', false, index)
+              r10 = instantiate_node(SyntaxNode,input, index...(index + 0))
+              @index += 0
+            else
+              terminal_parse_failure('')
+              r10 = nil
+            end
+            s9 << r10
+            if r10
+              i11 = index
+              r12 = lambda { |s| @failure_description = :no_closing_quote; true }.call(s9)
+              if r12
+                r11 = nil
+              else
+                @index = i11
+                r11 = instantiate_node(SyntaxNode,input, index...index)
+              end
+              s9 << r11
+            end
+            if s9.last
+              r9 = instantiate_node(SyntaxNode,input, i9...index, s9)
+              r9.extend(QuotedText1)
+            else
+              @index = i9
+              r9 = nil
+            end
+            if r9
+              r7 = r9
+            else
+              @index = i7
+              r7 = nil
+            end
+          end
           s0 << r7
         end
       end
       if s0.last
         r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-        r0.extend(QuotedText1)
+        r0.extend(QuotedText2)
       else
         @index = i0
         r0 = nil
@@ -434,14 +472,25 @@ module CsvParser
           end
           s1 << r4
           if r4
-            if index < input_length
-              r6 = instantiate_node(SyntaxNode,input, index...(index + 1))
-              @index += 1
-            else
-              terminal_parse_failure("any character")
+            i6 = index
+            r7 = _nt_quote
+            if r7
               r6 = nil
+            else
+              @index = i6
+              r6 = instantiate_node(SyntaxNode,input, index...index)
             end
             s1 << r6
+            if r6
+              if index < input_length
+                r8 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                @index += 1
+              else
+                terminal_parse_failure("any character")
+                r8 = nil
+              end
+              s1 << r8
+            end
           end
         end
         if s1.last

@@ -42,6 +42,13 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [["foo,bar"]], result.value
   end
 
+  test "missing closing quote" do
+    parser = CsvParser::CsvParser.new
+    result = parser.parse(%{"foo})
+    assert !result
+    assert_equal :no_closing_quote, parser.failure_description
+  end
+
   test "single-character custom field separator" do
     parser = CsvParser::CsvParser.new
     parser.field_sep = "\t"

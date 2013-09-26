@@ -49,27 +49,33 @@ module CsvParser
     end
 
     rule field
-      quoted_text
-      {
-        def value
-          elements[1..-2].map(&:text_value).join
-        end
-      }
-      /
       unquoted_text
       {
         def value
           elements.map(&:text_value).join
         end
       }
+      /
+      quoted_text
+      {
+        def value
+          elements[1..-2].map(&:text_value).join
+        end
+      }
     end
 
     rule quoted_text
-      quote ( !quote . )+ quote
+      quote
+      ( !quote . )+
+      (
+        quote
+        /
+        '' !{ |s| @failure_description = :no_closing_quote; true }
+      )
     end
 
     rule unquoted_text
-      ( !field_sep !record_sep . )+
+      ( !field_sep !record_sep !quote . )+
     end
 
     rule field_sep
