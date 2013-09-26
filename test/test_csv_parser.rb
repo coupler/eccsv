@@ -57,4 +57,20 @@ class TestCsvParser < Test::Unit::TestCase
     assert result, parser.failure_reason
     assert_equal [['baz', 'bar']], result.value
   end
+
+  test "single-character custom record separator" do
+    parser = CsvParser::CsvParser.new
+    parser.record_sep = "x"
+    result = parser.parse("fooxbar")
+    assert result, parser.failure_reason
+    assert_equal [['foo'], ['bar']], result.value
+  end
+
+  test "multi-character custom record separator" do
+    parser = CsvParser::CsvParser.new
+    parser.record_sep = "foo"
+    result = parser.parse("barfoobaz")
+    assert result, parser.failure_reason
+    assert_equal [['bar'], ['baz']], result.value
+  end
 end

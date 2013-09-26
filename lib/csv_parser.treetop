@@ -92,7 +92,20 @@ module CsvParser
     end
 
     rule record_sep
-      "\n"
+      &{ |s| @record_sep_index = 0; true }
+      (
+        .
+        &{ |s|
+          if @record_sep_index < record_sep.length &&
+             s[0].text_value == record_sep[@record_sep_index]
+            @record_sep_index += 1
+            true
+          else
+            false
+          end
+        }
+      )+
+      &{ |s| s.map(&:text_value).join == record_sep }
     end
 
     rule quote
