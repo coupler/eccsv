@@ -15,5 +15,9 @@ module CsvParser
     def record_sep=(str)
       @record_sep = str
     end
+
+    def failure_description
+      @failure_description
+    end
   end
 end

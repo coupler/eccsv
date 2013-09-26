@@ -80,4 +80,25 @@ class TestCsvParser < Test::Unit::TestCase
     assert result, parser.failure_reason
     assert_equal [['bar'], ['baz']], result.value
   end
+
+  test "parse helper" do
+    result = CsvParser.parse("foo,bar")
+    assert_equal [['foo', 'bar']], result
+  end
+
+  test "parse helper with options" do
+    result = CsvParser.parse("foo\tbar", :field_sep => "\t")
+    assert_equal [['foo', 'bar']], result
+  end
+
+  test "parse helper with missing closing quote" do
+    error = nil
+    begin
+      assert_nil CsvParser.parse(%{"foo})
+    rescue CsvParser::MissingQuoteError => error
+      assert_equal 1, error.line
+      assert_equal 5, error.column
+    end
+    assert error
+  end
 end
