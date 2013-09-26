@@ -64,7 +64,7 @@ module CsvParser
       &{ |s| @record_length = 1; true }
       rest:(
         &{ |s|
-          if @first_record || @record_length < @first_record_length
+          if @first_record || allow_uneven_records? || @record_length < @first_record_length
             true
           else
             @failure_description = :extra_fields
@@ -76,7 +76,7 @@ module CsvParser
         &{ |s| @record_length += 1; true }
       )*
       &{ |s|
-        if @first_record || @record_length == @first_record_length
+        if @first_record || allow_uneven_records? || @record_length == @first_record_length
           true
         else
           @failure_description = :missing_fields

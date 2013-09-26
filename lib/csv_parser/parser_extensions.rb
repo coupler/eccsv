@@ -29,11 +29,27 @@ module CsvParser
     end
 
     def skip_empty_record?
-      @skip_empty_record
+      if defined? @skip_empty_record
+        @skip_empty_record
+      else
+        true
+      end
     end
 
     def skip_empty_record=(bool)
       @skip_empty_record = bool
+    end
+
+    def allow_uneven_records?
+      if defined? @allow_uneven_records
+        @allow_uneven_records
+      else
+        true
+      end
+    end
+
+    def allow_uneven_records=(bool)
+      @allow_uneven_records = bool
     end
 
     def failure_description

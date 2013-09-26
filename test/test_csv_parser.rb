@@ -24,25 +24,17 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [], result.value
   end
 
-  test "empty record" do
+  test "empty record is skipped by default" do
     result, error = parse("foo\n\nbar")
     assert result, error
-    assert_equal [['foo'], [], ['bar']], result.value
-  end
-
-  test "empty record when disallowed" do
-    parser = CsvParser::CsvParser.new
-    parser.allow_empty_record = false
-    result = parser.parse("foo\n\nbar")
-    assert_nil result
-    assert_equal :missing_fields, parser.failure_description
-  end
-
-  test "skipping an empty record" do
-    parser = CsvParser::CsvParser.new
-    parser.skip_empty_record = true
-    result = parser.parse("foo\n\nbar")
     assert_equal [['foo'], ['bar']], result.value
+  end
+
+  test "not skipping an empty record" do
+    parser = CsvParser::CsvParser.new
+    parser.skip_empty_record = false
+    result = parser.parse("foo\n\nbar")
+    assert_equal [['foo'], [], ['bar']], result.value
   end
 
   test "two records" do
@@ -71,15 +63,27 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal :stray_quote, parser.failure_description
   end
 
-  test "not enough fields" do
+  test "missing fields is okay by default" do
+    result, error = parse(%{foo,bar\nbaz})
+    assert result, error
+  end
+
+  test "missing fields when disallowed" do
     parser = CsvParser::CsvParser.new
+    parser.allow_uneven_records = false
     result = parser.parse(%{foo,bar\nbaz})
     assert !result
     assert_equal :missing_fields, parser.failure_description
   end
 
-  test "extra fields" do
+  test "extra fields is okay by default" do
+    result, error = parse(%{foo\nbar,baz})
+    assert result, error
+  end
+
+  test "extra fields when disallowed" do
     parser = CsvParser::CsvParser.new
+    parser.allow_uneven_records = false
     result = parser.parse(%{foo\nbar,baz})
     assert !result
     assert_equal :extra_fields, parser.failure_description
@@ -152,7 +156,7 @@ class TestCsvParser < Test::Unit::TestCase
   test "parse helper with short records" do
     error = nil
     begin
-      assert_nil CsvParser.parse(%{foo,bar\nbaz})
+      assert_nil CsvParser.parse(%{foo,bar\nbaz}, :allow_uneven_records => false)
     rescue CsvParser::MissingFieldsError => error
       assert_equal 2, error.line
       assert_equal 4, error.column
@@ -163,7 +167,7 @@ class TestCsvParser < Test::Unit::TestCase
   test "parse helper with long records" do
     error = nil
     begin
-      assert_nil CsvParser.parse(%{foo\nbar,baz})
+      assert_nil CsvParser.parse(%{foo\nbar,baz}, :allow_uneven_records => false)
     rescue CsvParser::ExtraFieldsError => error
       assert_equal 2, error.line
       assert_equal 5, error.column
