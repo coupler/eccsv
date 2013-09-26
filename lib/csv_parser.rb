@@ -31,7 +31,7 @@ module CsvParser
     else
       klass =
         case parser.failure_description
-        when :no_closing_quote
+        when :missing_quote
           MissingQuoteError
         when :stray_quote
           StrayQuoteError

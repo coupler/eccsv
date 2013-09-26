@@ -396,7 +396,7 @@ module CsvParser
             s9 << r10
             if r10
               i11 = index
-              r12 = lambda { |s| @failure_description = :no_closing_quote; true }.call(s9)
+              r12 = lambda { |s| @failure_description = :missing_quote; true }.call(s9)
               if r12
                 r11 = nil
               else

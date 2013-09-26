@@ -46,7 +46,7 @@ class TestCsvParser < Test::Unit::TestCase
     parser = CsvParser::CsvParser.new
     result = parser.parse(%{"foo})
     assert !result
-    assert_equal :no_closing_quote, parser.failure_description
+    assert_equal :missing_quote, parser.failure_description
   end
 
   test "quote inside unquoted field" do
