@@ -134,4 +134,15 @@ class TestCsvParser < Test::Unit::TestCase
     end
     assert error
   end
+
+  test "parse helper with short records" do
+    error = nil
+    begin
+      assert_nil CsvParser.parse(%{foo,bar\nbaz})
+    rescue CsvParser::MissingFieldsError => error
+      assert_equal 2, error.line
+      assert_equal 4, error.column
+    end
+    assert error
+  end
 end

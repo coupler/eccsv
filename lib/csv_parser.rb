@@ -19,6 +19,7 @@ module CsvParser
 
   class MissingQuoteError < Error; end
   class StrayQuoteError < Error; end
+  class MissingFieldsError < Error; end
 
   def self.parse(data, options = {})
     parser = ::CsvParser::CsvParser.new
@@ -35,6 +36,8 @@ module CsvParser
           MissingQuoteError
         when :stray_quote
           StrayQuoteError
+        when :missing_fields
+          MissingFieldsError
         else
           Error
         end
