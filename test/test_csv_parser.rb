@@ -38,6 +38,13 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal :missing_fields, parser.failure_description
   end
 
+  test "skipping an empty record" do
+    parser = CsvParser::CsvParser.new
+    parser.skip_empty_record = true
+    result = parser.parse("foo\n\nbar")
+    assert_equal [['foo'], ['bar']], result.value
+  end
+
   test "two records" do
     result, error = parse("foo,bar\nbaz,qux")
     assert result, error

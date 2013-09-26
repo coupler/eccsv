@@ -196,19 +196,22 @@ module CsvParser
     end
 
     module OtherRecords0
+    end
+
+    module OtherRecords1
       def record_sep
         elements[0]
       end
 
       def record
-        elements[1]
+        elements[2]
       end
     end
 
-    module OtherRecords1
+    module OtherRecords2
     end
 
-    module OtherRecords2
+    module OtherRecords3
       def value
         elements[2].elements.collect { |elt| elt.record.value }
       end
@@ -251,12 +254,50 @@ module CsvParser
             r6 = _nt_record_sep
             s5 << r6
             if r6
-              r7 = _nt_record
+              i8, s8 = index, []
+              i9 = index
+              r10 = lambda { |s| skip_empty_record? }.call(s8)
+              if r10
+                @index = i9
+                r9 = instantiate_node(SyntaxNode,input, index...index)
+              else
+                r9 = nil
+              end
+              s8 << r9
+              if r9
+                s11, i11 = [], index
+                loop do
+                  r12 = _nt_record_sep
+                  if r12
+                    s11 << r12
+                  else
+                    break
+                  end
+                end
+                r11 = instantiate_node(SyntaxNode,input, i11...index, s11)
+                s8 << r11
+              end
+              if s8.last
+                r8 = instantiate_node(SyntaxNode,input, i8...index, s8)
+                r8.extend(OtherRecords0)
+              else
+                @index = i8
+                r8 = nil
+              end
+              if r8
+                r7 = r8
+              else
+                r7 = instantiate_node(SyntaxNode,input, index...index)
+              end
               s5 << r7
+              if r7
+                r13 = _nt_record
+                s5 << r13
+              end
             end
             if s5.last
               r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
-              r5.extend(OtherRecords0)
+              r5.extend(OtherRecords1)
             else
               @index = i5
               r5 = nil
@@ -273,8 +314,8 @@ module CsvParser
       end
       if s0.last
         r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-        r0.extend(OtherRecords1)
         r0.extend(OtherRecords2)
+        r0.extend(OtherRecords3)
       else
         @index = i0
         r0 = nil

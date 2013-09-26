@@ -42,6 +42,10 @@ module CsvParser
       '' &{ |s| @first_record = false; true }
       (
         record_sep
+        (
+          &{ |s| skip_empty_record? }
+          record_sep*
+        )?
         record
       )*
       {

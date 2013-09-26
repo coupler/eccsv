@@ -28,6 +28,14 @@ module CsvParser
       @allow_empty_record = bool
     end
 
+    def skip_empty_record?
+      @skip_empty_record
+    end
+
+    def skip_empty_record=(bool)
+      @skip_empty_record = bool
+    end
+
     def failure_description
       @failure_description
     end
