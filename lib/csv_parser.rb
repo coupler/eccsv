@@ -41,20 +41,20 @@ module CsvParser
   end
 
   def self.error(description, line, column, msg = nil)
-      klass =
-        case description
-        when :missing_quote
-          MissingQuoteError
-        when :stray_quote
-          StrayQuoteError
-        when :missing_fields
-          MissingFieldsError
-        when :extra_fields
-          ExtraFieldsError
-        else
-          Error
-        end
+    klass =
+      case description
+      when :missing_quote
+        MissingQuoteError
+      when :stray_quote
+        StrayQuoteError
+      when :missing_fields
+        MissingFieldsError
+      when :extra_fields
+        ExtraFieldsError
+      else
+        Error
+      end
 
-      klass.new(msg, line, column)
+    klass.new(msg, line, column)
   end
 end

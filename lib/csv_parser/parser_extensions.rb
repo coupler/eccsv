@@ -64,6 +64,10 @@ module CsvParser
       @failure_description
     end
 
+    def failure_index
+      @failure_index || super
+    end
+
     def warnings
       @warnings ||= []
     end

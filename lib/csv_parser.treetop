@@ -172,7 +172,7 @@ module CsvParser
       (
         quote
         /
-        '' !{ |s| @failure_description = :missing_quote; true }
+        '' !{ |s| @failure_description = :missing_quote; @failure_index = start_index; true }
       )
     end
 

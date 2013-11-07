@@ -162,7 +162,7 @@ class TestCsvParser < Test::Unit::TestCase
       CsvParser.parse(%{"foo})
     rescue CsvParser::MissingQuoteError => error
       assert_equal 1, error.line
-      assert_equal 5, error.column
+      assert_equal 1, error.column
     end
     assert error
   end
