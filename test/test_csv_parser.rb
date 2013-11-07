@@ -43,6 +43,13 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [['foo'], [], ['bar']], result.value
   end
 
+  test "not skipping empty record at end" do
+    parser = CsvParser::CsvParser.new
+    parser.skip_empty_record = false
+    result = parser.parse("foo\nbar\n")
+    assert_equal [['foo'], ['bar'], []], result.value
+  end
+
   test "two records" do
     result, error = parse("foo,bar\nbaz,qux")
     assert result, error
