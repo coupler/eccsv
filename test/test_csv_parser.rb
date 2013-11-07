@@ -66,14 +66,14 @@ class TestCsvParser < Test::Unit::TestCase
     parser = CsvParser::CsvParser.new
     result = parser.parse(%{"foo})
     assert !result
-    assert_equal :missing_quote, parser.failure_description
+    assert_equal :missing_quote, parser.failure_type
   end
 
   test "quote inside unquoted field" do
     parser = CsvParser::CsvParser.new
     result = parser.parse(%{f"oo})
     assert !result
-    assert_equal :stray_quote, parser.failure_description
+    assert_equal :stray_quote, parser.failure_type
   end
 
   test "missing fields gets warning by default" do
@@ -88,7 +88,7 @@ class TestCsvParser < Test::Unit::TestCase
     parser.allow_uneven_records = false
     result = parser.parse(%{foo,bar\nbaz})
     assert !result
-    assert_equal :missing_fields, parser.failure_description
+    assert_equal :missing_fields, parser.failure_type
   end
 
   test "extra fields gets warning by default" do
@@ -103,7 +103,7 @@ class TestCsvParser < Test::Unit::TestCase
     parser.allow_uneven_records = false
     result = parser.parse(%{foo\nbar,baz})
     assert !result
-    assert_equal :extra_fields, parser.failure_description
+    assert_equal :extra_fields, parser.failure_type
   end
 
   test "single-character custom field separator" do
@@ -163,6 +163,7 @@ class TestCsvParser < Test::Unit::TestCase
     rescue CsvParser::MissingQuoteError => error
       assert_equal 1, error.line
       assert_equal 1, error.column
+      assert_equal "no ending quote found for quote on line 1, column 1", error.message
     end
     assert error
   end

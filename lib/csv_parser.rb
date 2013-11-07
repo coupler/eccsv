@@ -35,16 +35,16 @@ module CsvParser
       end
       Result.new(result.value, warnings)
     else
-      raise error(parser.failure_description, parser.failure_line,
+      raise error(parser.failure_type, parser.failure_line,
                   parser.failure_column, parser.failure_reason)
     end
   end
 
-  def self.error(description, line, column, msg = nil)
-    klass =
-      case description
+  def self.error(type, line, column, msg = nil)
+    klass, msg =
+      case type
       when :missing_quote
-        MissingQuoteError
+        [MissingQuoteError, "no ending quote found for quote on line #{line}, column #{column}"]
       when :stray_quote
         StrayQuoteError
       when :missing_fields

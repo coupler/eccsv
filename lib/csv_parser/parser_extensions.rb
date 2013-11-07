@@ -60,8 +60,8 @@ module CsvParser
       @allow_uneven_records = bool
     end
 
-    def failure_description
-      @failure_description
+    def failure_type
+      @failure_type
     end
 
     def failure_index

@@ -598,7 +598,7 @@ module CsvParser
                           @warning ||= [:extra_fields, input.line_of(index + 1), input.column_of(index + 1)]
                           true
                         else
-                          @failure_description = :extra_fields
+                          @failure_type = :extra_fields
                           false
                         end
                       end
@@ -657,7 +657,7 @@ module CsvParser
                         warnings << [:missing_fields, input.line_of(index), input.column_of(index)]
                         true
                       else
-                        @failure_description = :missing_fields
+                        @failure_type = :missing_fields
                         false
                       end
                     end
@@ -721,7 +721,7 @@ module CsvParser
                 if allow_empty_record?
                   true
                 else
-                  @failure_description = :missing_fields
+                  @failure_type = :missing_fields
                   false
                 end
               }.call(s0)
@@ -878,7 +878,7 @@ module CsvParser
             s9 << r10
             if r10
               i11 = index
-              r12 = lambda { |s| @failure_description = :missing_quote; @failure_index = start_index; true }.call(s9)
+              r12 = lambda { |s| @failure_type = :missing_quote; @failure_index = start_index; true }.call(s9)
               if r12
                 r11 = nil
               else
@@ -980,7 +980,7 @@ module CsvParser
               s9 << r10
               if r10
                 i11 = index
-                r12 = lambda { |s| @failure_description = :stray_quote; true }.call(s9)
+                r12 = lambda { |s| @failure_type = :stray_quote; true }.call(s9)
                 if r12
                   r11 = nil
                 else
