@@ -54,7 +54,10 @@ module CsvParser
     module NonEmptyRecords1
       def value
         arr = [first_record.value]
-        arr.push(*other_records.value)
+        rest = other_records.value
+        if rest
+          arr.push(*rest)
+        end
         arr
       end
     end
@@ -196,6 +199,13 @@ module CsvParser
     end
 
     module OtherRecords0
+      def empty_record
+        elements[0]
+      end
+
+      def record_sep
+        elements[1]
+      end
     end
 
     module OtherRecords1
@@ -203,17 +213,60 @@ module CsvParser
         elements[0]
       end
 
-      def record
+      def non_empty_record
         elements[2]
       end
     end
 
     module OtherRecords2
+      def record_sep
+        elements[0]
+      end
+
+      def empty_record
+        elements[1]
+      end
     end
 
     module OtherRecords3
+    end
+
+    module OtherRecords4
+    end
+
+    module OtherRecords5
       def value
-        elements[2].elements.collect { |elt| elt.record.value }
+        val = elements[1].elements.collect { |elt| elt.non_empty_record.value }
+        val.empty? ? nil : val
+      end
+    end
+
+    module OtherRecords6
+      def record_sep
+        elements[0]
+      end
+
+      def record
+        elements[1]
+      end
+    end
+
+    module OtherRecords7
+    end
+
+    module OtherRecords8
+      def value
+        val = elements[1].elements.collect { |elt| elt.record.value }
+        val.empty? ? nil : val
+      end
+    end
+
+    module OtherRecords9
+    end
+
+    module OtherRecords10
+      def value
+        elements[2].value
       end
     end
 
@@ -248,26 +301,40 @@ module CsvParser
         end
         s0 << r2
         if r2
-          s4, i4 = [], index
-          loop do
-            i5, s5 = index, []
-            r6 = _nt_record_sep
-            s5 << r6
-            if r6
-              i8, s8 = index, []
-              i9 = index
-              r10 = lambda { |s| skip_empty_record? }.call(s8)
+          i4 = index
+          i5, s5 = index, []
+          i6 = index
+          r7 = lambda { |s| skip_empty_record? }.call(s5)
+          if r7
+            @index = i6
+            r6 = instantiate_node(SyntaxNode,input, index...index)
+          else
+            r6 = nil
+          end
+          s5 << r6
+          if r6
+            s8, i8 = [], index
+            loop do
+              i9, s9 = index, []
+              r10 = _nt_record_sep
+              s9 << r10
               if r10
-                @index = i9
-                r9 = instantiate_node(SyntaxNode,input, index...index)
-              else
-                r9 = nil
-              end
-              s8 << r9
-              if r9
                 s11, i11 = [], index
                 loop do
-                  r12 = _nt_record_sep
+                  i12, s12 = index, []
+                  r13 = _nt_empty_record
+                  s12 << r13
+                  if r13
+                    r14 = _nt_record_sep
+                    s12 << r14
+                  end
+                  if s12.last
+                    r12 = instantiate_node(SyntaxNode,input, i12...index, s12)
+                    r12.extend(OtherRecords0)
+                  else
+                    @index = i12
+                    r12 = nil
+                  end
                   if r12
                     s11 << r12
                   else
@@ -275,47 +342,153 @@ module CsvParser
                   end
                 end
                 r11 = instantiate_node(SyntaxNode,input, i11...index, s11)
-                s8 << r11
+                s9 << r11
+                if r11
+                  r15 = _nt_non_empty_record
+                  s9 << r15
+                end
               end
-              if s8.last
-                r8 = instantiate_node(SyntaxNode,input, i8...index, s8)
-                r8.extend(OtherRecords0)
+              if s9.last
+                r9 = instantiate_node(SyntaxNode,input, i9...index, s9)
+                r9.extend(OtherRecords1)
               else
-                @index = i8
-                r8 = nil
+                @index = i9
+                r9 = nil
               end
-              if r8
-                r7 = r8
+              if r9
+                s8 << r9
               else
-                r7 = instantiate_node(SyntaxNode,input, index...index)
-              end
-              s5 << r7
-              if r7
-                r13 = _nt_record
-                s5 << r13
+                break
               end
             end
-            if s5.last
-              r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
-              r5.extend(OtherRecords1)
-            else
-              @index = i5
-              r5 = nil
-            end
-            if r5
-              s4 << r5
-            else
-              break
+            r8 = instantiate_node(SyntaxNode,input, i8...index, s8)
+            s5 << r8
+            if r8
+              i17, s17 = index, []
+              i18 = index
+              r19 = lambda { |s| skip_empty_record? }.call(s17)
+              if r19
+                @index = i18
+                r18 = instantiate_node(SyntaxNode,input, index...index)
+              else
+                r18 = nil
+              end
+              s17 << r18
+              if r18
+                s20, i20 = [], index
+                loop do
+                  i21, s21 = index, []
+                  r22 = _nt_record_sep
+                  s21 << r22
+                  if r22
+                    r23 = _nt_empty_record
+                    s21 << r23
+                  end
+                  if s21.last
+                    r21 = instantiate_node(SyntaxNode,input, i21...index, s21)
+                    r21.extend(OtherRecords2)
+                  else
+                    @index = i21
+                    r21 = nil
+                  end
+                  if r21
+                    s20 << r21
+                  else
+                    break
+                  end
+                end
+                if s20.empty?
+                  @index = i20
+                  r20 = nil
+                else
+                  r20 = instantiate_node(SyntaxNode,input, i20...index, s20)
+                end
+                s17 << r20
+              end
+              if s17.last
+                r17 = instantiate_node(SyntaxNode,input, i17...index, s17)
+                r17.extend(OtherRecords3)
+              else
+                @index = i17
+                r17 = nil
+              end
+              if r17
+                r16 = r17
+              else
+                r16 = instantiate_node(SyntaxNode,input, index...index)
+              end
+              s5 << r16
             end
           end
-          r4 = instantiate_node(SyntaxNode,input, i4...index, s4)
+          if s5.last
+            r5 = instantiate_node(SyntaxNode,input, i5...index, s5)
+            r5.extend(OtherRecords4)
+            r5.extend(OtherRecords5)
+          else
+            @index = i5
+            r5 = nil
+          end
+          if r5
+            r4 = r5
+          else
+            i24, s24 = index, []
+            i25 = index
+            r26 = lambda { |s| !skip_empty_record? }.call(s24)
+            if r26
+              @index = i25
+              r25 = instantiate_node(SyntaxNode,input, index...index)
+            else
+              r25 = nil
+            end
+            s24 << r25
+            if r25
+              s27, i27 = [], index
+              loop do
+                i28, s28 = index, []
+                r29 = _nt_record_sep
+                s28 << r29
+                if r29
+                  r30 = _nt_record
+                  s28 << r30
+                end
+                if s28.last
+                  r28 = instantiate_node(SyntaxNode,input, i28...index, s28)
+                  r28.extend(OtherRecords6)
+                else
+                  @index = i28
+                  r28 = nil
+                end
+                if r28
+                  s27 << r28
+                else
+                  break
+                end
+              end
+              r27 = instantiate_node(SyntaxNode,input, i27...index, s27)
+              s24 << r27
+            end
+            if s24.last
+              r24 = instantiate_node(SyntaxNode,input, i24...index, s24)
+              r24.extend(OtherRecords7)
+              r24.extend(OtherRecords8)
+            else
+              @index = i24
+              r24 = nil
+            end
+            if r24
+              r4 = r24
+            else
+              @index = i4
+              r4 = nil
+            end
+          end
           s0 << r4
         end
       end
       if s0.last
         r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-        r0.extend(OtherRecords2)
-        r0.extend(OtherRecords3)
+        r0.extend(OtherRecords9)
+        r0.extend(OtherRecords10)
       else
         @index = i0
         r0 = nil

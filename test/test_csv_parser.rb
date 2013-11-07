@@ -30,6 +30,12 @@ class TestCsvParser < Test::Unit::TestCase
     assert_equal [['foo'], ['bar']], result.value
   end
 
+  test "skipping empty record at end" do
+    result, error = parse("foo\nbar\n")
+    assert result, error
+    assert_equal [['foo'], ['bar']], result.value
+  end
+
   test "not skipping an empty record" do
     parser = CsvParser::CsvParser.new
     parser.skip_empty_record = false

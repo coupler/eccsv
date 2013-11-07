@@ -12,7 +12,10 @@ module CsvParser
       {
         def value
           arr = [first_record.value]
-          arr.push(*other_records.value)
+          rest = other_records.value
+          if rest
+            arr.push(*rest)
+          end
           arr
         end
       }
@@ -41,16 +44,39 @@ module CsvParser
     rule other_records
       '' &{ |s| @first_record = false; true }
       (
-        record_sep
         (
           &{ |s| skip_empty_record? }
-          record_sep*
-        )?
-        record
-      )*
+          (
+            record_sep
+            ( empty_record record_sep )*
+            non_empty_record
+          )*
+          (
+            &{ |s| skip_empty_record? }
+            ( record_sep empty_record )+
+          )?
+          {
+            def value
+              val = elements[1].elements.collect { |elt| elt.non_empty_record.value }
+              val.empty? ? nil : val
+            end
+          }
+        )
+        /
+        (
+          &{ |s| !skip_empty_record? }
+          ( record_sep record )*
+          {
+            def value
+              val = elements[1].elements.collect { |elt| elt.record.value }
+              val.empty? ? nil : val
+            end
+          }
+        )
+      )
       {
         def value
-          elements[2].elements.collect { |elt| elt.record.value }
+          elements[2].value
         end
       }
     end
