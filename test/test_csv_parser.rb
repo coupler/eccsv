@@ -175,6 +175,7 @@ class TestCsvParser < Test::Unit::TestCase
     rescue CsvParser::StrayQuoteError => error
       assert_equal 1, error.line
       assert_equal 2, error.column
+      assert_equal "invalid quote found on line 1, column 2", error.message
     end
     assert error
   end
@@ -186,6 +187,7 @@ class TestCsvParser < Test::Unit::TestCase
     error = result.warnings[0]
     assert_equal 2, error.line
     assert_equal 4, error.column
+    assert_equal "record on line 2 had too few fields", error.message
   end
 
   test "parse helper with disallowed short records" do
@@ -195,6 +197,7 @@ class TestCsvParser < Test::Unit::TestCase
     rescue CsvParser::MissingFieldsError => error
       assert_equal 2, error.line
       assert_equal 4, error.column
+      assert_equal "record on line 2 had too few fields", error.message
     end
     assert error
   end
@@ -206,6 +209,7 @@ class TestCsvParser < Test::Unit::TestCase
     error = result.warnings[0]
     assert_equal 2, error.line
     assert_equal 5, error.column
+    assert_equal "record on line 2 had too many fields", error.message
   end
 
   test "parse helper with disallowed long records" do
@@ -215,6 +219,7 @@ class TestCsvParser < Test::Unit::TestCase
     rescue CsvParser::ExtraFieldsError => error
       assert_equal 2, error.line
       assert_equal 5, error.column
+      assert_equal "record on line 2 had too many fields", error.message
     end
     assert error
   end

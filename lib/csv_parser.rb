@@ -46,11 +46,11 @@ module CsvParser
       when :missing_quote
         [MissingQuoteError, "no ending quote found for quote on line #{line}, column #{column}"]
       when :stray_quote
-        StrayQuoteError
+        [StrayQuoteError, "invalid quote found on line #{line}, column #{column}"]
       when :missing_fields
-        MissingFieldsError
+        [MissingFieldsError, "record on line #{line} had too few fields"]
       when :extra_fields
-        ExtraFieldsError
+        [ExtraFieldsError, "record on line #{line} had too many fields"]
       else
         Error
       end
