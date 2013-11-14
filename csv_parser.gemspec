@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = CsvParser::VERSION
   spec.authors       = ["Jeremy Stephens"]
   spec.email         = ["jeremy.f.stephens@vanderbilt.edu"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{CSV parser with advanced error reporting}
+  spec.summary       = %q{CSV parser with advanced error reporting}
+  spec.homepage      = "https://github.com/coupler/csv_parser"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
