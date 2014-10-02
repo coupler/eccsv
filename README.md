@@ -17,11 +17,23 @@ Or install it yourself as:
 
     $ gem install eccsv
 
-## Usage
+## Basic Usage
 
-ECCSV's goal is to give you descriptive error messages.
+```ruby
+require 'eccsv'
 
-### Error types
+data = <<EOF
+foo,bar
+baz,qux
+EOF
+
+parser = ECCSV::Parser.new
+parser.parse(data) #=> [["foo", "bar"], ["baz", "qux"]]
+```
+
+## Errors
+
+One of the goals of this project is to give you descriptive error messages.
 
 Each error type is a subclass of `ECCSV::Error` and contains the exact line
 number (via `Error#line`) and column number (via `Error#col`) where the error
@@ -36,22 +48,6 @@ Since missing/extra fields do not cause the CSV to be unparsable, they are
 treated as warnings instead of errors (see example below).
 
 ### Examples
-
-#### Normal CSV
-
-The `ECCSV::Parser#parse` method returns an array of arrays if the CSV is error-free.
-
-```ruby
-require 'eccsv'
-
-data = <<EOF
-foo,bar
-baz,qux
-EOF
-
-parser = ECCSV::Parser.new
-parser.parse(data) #=> [["foo", "bar"], ["baz", "qux"]]
-```
 
 #### Unmatched quote
 
