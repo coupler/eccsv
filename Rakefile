@@ -12,5 +12,5 @@ desc "Compile racc grammar"
 task :racc => "lib/eccsv/parser.rb"
 
 file "lib/eccsv/parser.rb" => "lib/eccsv/parser.y" do |t|
-  system("racc -g -v -o #{t.name} #{t.source}")
+  system("racc -v -o #{t.name} #{t.source}")
 end
