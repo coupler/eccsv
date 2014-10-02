@@ -1,105 +1,108 @@
 require 'helper'
 
-class TestCsvParser < Test::Unit::TestCase
+class TestParser < Test::Unit::TestCase
   def parse(string)
-    parser = CsvParser::CsvParser.new
-    [parser.parse(string), parser.failure_reason]
+    parser = ECCSV::Parser.new
+    parser.parse(string)
   end
 
   test "one record with two fields" do
-    result, error = parse("foo,bar")
-    assert result, error
-    assert_equal [['foo', 'bar']], result.value
+    assert_equal [['foo', 'bar']], parse("foo,bar")
   end
 
   test "one record with one field" do
-    result, error = parse("foo")
-    assert result, error
-    assert_equal [['foo']], result.value
+    assert_equal [['foo']], parse("foo")
   end
 
   test "empty records" do
-    result, error = parse("")
-    assert result, error
-    assert_equal [], result.value
+    assert_equal [], parse("")
   end
 
   test "empty record is skipped by default" do
-    result, error = parse("foo\n\nbar")
-    assert result, error
-    assert_equal [['foo'], ['bar']], result.value
+    assert_equal [['foo'], ['bar']], parse("foo\n\nbar")
   end
 
   test "skipping empty record at end" do
-    result, error = parse("foo\nbar\n")
-    assert result, error
-    assert_equal [['foo'], ['bar']], result.value
+    assert_equal [['foo'], ['bar']], parse("foo\nbar\n")
   end
 
+=begin
   test "not skipping an empty record" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.skip_empty_record = false
     result = parser.parse("foo\n\nbar")
     assert_equal [['foo'], [], ['bar']], result.value
   end
 
   test "not skipping empty record at end" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.skip_empty_record = false
     result = parser.parse("foo\nbar\n")
     assert_equal [['foo'], ['bar'], []], result.value
   end
+=end
 
   test "two records" do
-    result, error = parse("foo,bar\nbaz,qux")
-    assert result, error
-    assert_equal [['foo', 'bar'], ['baz', 'qux']], result.value
+    assert_equal [['foo', 'bar'], ['baz', 'qux']], parse("foo,bar\nbaz,qux")
   end
 
   test "quoted field" do
-    result, error = parse(%{"foo,bar"})
-    assert result, error
-    assert_equal [["foo,bar"]], result.value
+    assert_equal [["foo,bar"]], parse(%{"foo,bar"})
   end
 
   test "missing closing quote" do
-    parser = CsvParser::CsvParser.new
-    result = parser.parse(%{"foo})
+    parser = ECCSV::Parser.new
+    result = parser.parse(%{foo,bar\n"foo})
     assert !result
-    assert_equal :missing_quote, parser.failure_type
+    assert_kind_of ECCSV::UnmatchedQuoteError, parser.error
+    assert_equal 2, parser.error.line
+    assert_equal 1, parser.error.col
   end
 
   test "quote inside unquoted field" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     result = parser.parse(%{f"oo})
     assert !result
-    assert_equal :stray_quote, parser.failure_type
+    assert_kind_of ECCSV::StrayQuoteError, parser.error
+    assert_equal 1, parser.error.line
+    assert_equal 2, parser.error.col
   end
 
   test "missing fields gets warning by default" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     result = parser.parse(%{foo,bar\nbaz})
-    assert result, parser.failure_reason
-    assert_equal [[:missing_fields, 2, 4]], parser.warnings
+    assert_equal [['foo', 'bar'], ['baz']], result
+    assert_equal 1, parser.warnings.length
+    warning = parser.warnings[0]
+    assert_kind_of ECCSV::MissingFieldsError, warning
+    assert_equal 2, warning.line
+    assert_equal 4, warning.col
   end
 
+=begin
   test "missing fields when disallowed" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.allow_uneven_records = false
     result = parser.parse(%{foo,bar\nbaz})
     assert !result
     assert_equal :missing_fields, parser.failure_type
   end
+=end
 
   test "extra fields gets warning by default" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     result = parser.parse(%{foo\nbar,baz})
-    assert result, parser.failure_reason
-    assert_equal [[:extra_fields, 2, 5]], parser.warnings
+    assert_equal [['foo'], ['bar', 'baz']], result
+    assert_equal 1, parser.warnings.length
+    warning = parser.warnings[0]
+    assert_kind_of ECCSV::ExtraFieldsError, warning
+    assert_equal 2, warning.line
+    assert_equal 4, warning.col
   end
 
+=begin
   test "extra fields when disallowed" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.allow_uneven_records = false
     result = parser.parse(%{foo\nbar,baz})
     assert !result
@@ -107,7 +110,7 @@ class TestCsvParser < Test::Unit::TestCase
   end
 
   test "single-character custom field separator" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.field_sep = "\t"
     result = parser.parse("foo\tbar")
     assert result, parser.failure_reason
@@ -115,7 +118,7 @@ class TestCsvParser < Test::Unit::TestCase
   end
 
   test "multi-character custom field separator" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.field_sep = "foo"
     result = parser.parse("bazfoobar")
     assert result, parser.failure_reason
@@ -123,7 +126,7 @@ class TestCsvParser < Test::Unit::TestCase
   end
 
   test "single-character custom record separator" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.record_sep = "x"
     result = parser.parse("fooxbar")
     assert result, parser.failure_reason
@@ -131,7 +134,7 @@ class TestCsvParser < Test::Unit::TestCase
   end
 
   test "multi-character custom record separator" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.record_sep = "foo"
     result = parser.parse("barfoobaz")
     assert result, parser.failure_reason
@@ -139,7 +142,7 @@ class TestCsvParser < Test::Unit::TestCase
   end
 
   test "custom quote character" do
-    parser = CsvParser::CsvParser.new
+    parser = ECCSV::Parser.new
     parser.quote_char = "'"
     result = parser.parse("'foo,bar'")
     assert result, parser.failure_reason
@@ -223,4 +226,5 @@ class TestCsvParser < Test::Unit::TestCase
     end
     assert error
   end
+=end
 end

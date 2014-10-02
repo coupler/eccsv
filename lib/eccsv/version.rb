@@ -1,3 +1,3 @@
-module CsvParser
+module ECCSV
   VERSION = "0.0.1"
 end
