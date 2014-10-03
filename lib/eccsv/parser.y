@@ -33,41 +33,27 @@ require 'strscan'
 
 module ECCSV
 ---- inner
-  attr_reader :error
+  attr_reader :error, :warnings
+
+  def initialize
+    @warnings = []
+  end
 
   def parse(str)
-    @scanner = StringScanner.new(str)
-    @line = 1
-    @col = 1
+    @lexer = Lexer.new(str)
     do_parse
   end
 
+  def curr_line
+    @lexer.line
+  end
+
+  def curr_col
+    @lexer.col
+  end
+
   def next_token
-    until @scanner.empty?
-      next_line = @line
-      next_col = @col
-      case
-        when match = @scanner.scan(/,/)
-          token = :COMMA
-        when match = @scanner.scan(/"/)
-          token = :QUOTE
-        when match = @scanner.scan(/\n/)
-          token = :NEWLINE
-          next_line += 1
-          next_col = 0
-        when match = @scanner.scan(/[^,\n"]+/)
-          token = :TEXT
-        else
-          raise "can't recognize <#{@scanner.peek(5)}>"
-      end
-      next_col += match.length
-
-      value = node(match, token)
-      @line = next_line
-      @col = next_col
-
-      return [token, value]
-    end
+    @lexer.next_token
   end
 
   def warnings
@@ -76,27 +62,23 @@ module ECCSV
 
   private
 
-  def node(value = "", token = nil, line = @line, col = @col)
-    Node.new(value, token, line, col)
-  end
-
-  def quoted_text(children = [], line = @line, col = @col)
+  def quoted_text(children = [], line = curr_line, col = curr_col)
     QuotedTextNode.new(children, line, col)
   end
 
-  def field(children = [], line = @line, col = @col)
+  def field(children = [], line = curr_line, col = curr_col)
     FieldNode.new(children, line, col)
   end
 
-  def delim_field(children = [], line = @line, col = @col)
+  def delim_field(children = [], line = curr_line, col = curr_col)
     DelimFieldNode.new(children, line, col)
   end
 
-  def delim_fields(children = [], line = @line, col = @col)
+  def delim_fields(children = [], line = curr_line, col = curr_col)
     DelimFieldsNode.new(children, line, col)
   end
 
-  def record(children = [], line = @line, col = @col)
+  def record(children = [], line = curr_line, col = curr_col)
     record = RecordNode.new(children, line, col)
     value = record.value
     if defined? @num_fields
@@ -117,15 +99,15 @@ module ECCSV
     record
   end
 
-  def delim_record(children = [], line = @line, col = @col)
+  def delim_record(children = [], line = curr_line, col = curr_col)
     DelimRecordNode.new(children, line, col)
   end
 
-  def delim_records(children = [], line = @line, col = @col)
+  def delim_records(children = [], line = curr_line, col = curr_col)
     DelimRecordsNode.new(children, line, col)
   end
 
-  def root(children = [], line = @line, col = @col)
+  def root(children = [], line = curr_line, col = curr_col)
     RootNode.new(children, line, col)
   end
 
