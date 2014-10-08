@@ -19,16 +19,17 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 36)
   end
 
   def parse(str)
-    @lexer = Lexer.new(str)
+    @stream = Stream.new(StringIO.new(str))
+    @lexer = Lexer.new(@stream)
     do_parse
   end
 
   def curr_line
-    @lexer.line
+    @stream.line
   end
 
   def curr_col
-    @lexer.col
+    @stream.col
   end
 
   def next_token
