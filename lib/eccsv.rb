@@ -1,5 +1,6 @@
 require 'eccsv/version'
 require 'eccsv/errors'
+require 'eccsv/stream'
 require 'eccsv/node'
 require 'eccsv/lexer'
 require 'eccsv/parser'

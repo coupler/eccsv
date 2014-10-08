@@ -3,29 +3,49 @@ module ECCSV
     attr_reader :line, :col
 
     def initialize(string)
-      @scanner = StringScanner.new(string)
+      @stream = Stream.new(StringIO.new(string))
       @line = 1
       @col = 1
     end
 
     def next_token
-      unless @scanner.empty?
+      unless @stream.eof?
         next_line = @line
         next_col = @col
-        case
-          when match = @scanner.scan(/,/)
-            token = :COMMA
-          when match = @scanner.scan(/"/)
-            token = :QUOTE
-          when match = @scanner.scan(/\n/)
-            token = :NEWLINE
-            next_line += 1
-            next_col = 0
-          when match = @scanner.scan(/[^,\n"]+/)
-            token = :TEXT
+        token = nil
+        match = ""
+
+        until @stream.eof?
+          c = @stream.peek
+          if token.nil?
+            match << c
+            @stream.next
+            if c == ","
+              token = :COMMA
+              break
+            elsif c == '"'
+              token = :QUOTE
+              break
+            elsif c == "\n"
+              token = :NEWLINE
+              next_line += 1
+              next_col = 0
+              break
+            else
+              token = :TEXT
+            end
+          elsif c != "," && c != '"' && c != "\n"
+            match << c
+            @stream.next
           else
-            raise "can't recognize <#{@scanner.peek(5)}>"
+            break
+          end
         end
+
+        if match.length == 0
+          raise "Stream error"
+        end
+
         next_col += match.length
 
         node = Node.new(match, token, @line, @col)
