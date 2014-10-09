@@ -37,10 +37,26 @@ module ECCSV
 
   def initialize
     @warnings = []
+    @corrections = []
+  end
+
+  def add_correction(line, col, type, *args)
+    klass =
+      case type
+      when :insert
+        InsertCorrection
+      else
+        raise "invalid correction type: #{type.inspect}"
+      end
+    correction = klass.new(line, col, *args)
+    @corrections << correction
   end
 
   def parse(str)
     @stream = Stream.new(StringIO.new(str))
+    @corrections.each do |correction|
+      correction.apply(@stream)
+    end
     @lexer = Lexer.new(@stream)
     do_parse
   end

@@ -227,4 +227,11 @@ class TestParser < Test::Unit::TestCase
     assert error
   end
 =end
+
+  test "single insertion correction" do
+    parser = ECCSV::Parser.new
+    parser.add_correction(2, 5, :insert, '"')
+    result = parser.parse(%{foo,bar\n"foo})
+    assert_equal [['foo', 'bar'], ['foo']], result
+  end
 end
