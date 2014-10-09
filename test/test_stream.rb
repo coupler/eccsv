@@ -60,4 +60,53 @@ class TestStream < Test::Unit::TestCase
     stream.next
     assert stream.eof?
   end
+
+  test "#insert at line and col" do
+    io = StringIO.new("foo")
+    stream = ECCSV::Stream.new(io)
+    stream.insert("x", 1, 2)
+    assert_equal "f", stream.next
+    assert_equal "x", stream.next
+    assert_equal "o", stream.next
+    assert_equal "o", stream.next
+  end
+
+  test "#insert at end of input" do
+    io = StringIO.new("foo")
+    stream = ECCSV::Stream.new(io)
+    stream.insert("x", 1, 4)
+    assert_equal "f", stream.next
+    assert_equal "o", stream.next
+    assert_equal "o", stream.next
+    assert !stream.eof?
+    assert_equal "x", stream.next
+  end
+
+  test "#insert multi-character string" do
+    io = StringIO.new("foo")
+    stream = ECCSV::Stream.new(io)
+    stream.insert("bar", 1, 2)
+    assert_equal "f", stream.next
+    assert_equal "b", stream.next
+    assert_equal "a", stream.next
+    assert_equal "r", stream.next
+    assert_equal "o", stream.next
+    assert_equal "o", stream.next
+  end
+
+  test "#insert newline" do
+    io = StringIO.new("foo")
+    stream = ECCSV::Stream.new(io)
+    stream.insert("bar\nbaz", 1, 2)
+    assert_equal "f", stream.next
+    assert_equal "b", stream.next
+    assert_equal "a", stream.next
+    assert_equal "r", stream.next
+    assert_equal "\n", stream.next
+    assert_equal "b", stream.next
+    assert_equal "a", stream.next
+    assert_equal "z", stream.next
+    assert_equal "o", stream.next
+    assert_equal "o", stream.next
+  end
 end
