@@ -1,11 +1,12 @@
 module ECCSV
   class Stream
-    attr_reader :line, :col
+    attr_reader :line, :col, :pos
 
     def initialize(io)
       @io = io
       @line = 1
       @col = 1
+      @pos = 0
       @inserts = Hash.new { |h, k| h[k] = {} }
     end
 
@@ -31,6 +32,7 @@ module ECCSV
         else
           @col += 1
         end
+        @pos += val.bytesize
       end
       val
     end

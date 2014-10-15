@@ -49,6 +49,22 @@ class TestStream < Test::Unit::TestCase
     assert_equal 1, stream.col
   end
 
+  test "#next increases pos for single-byte character" do
+    io = StringIO.new("foo")
+    stream = ECCSV::Stream.new(io)
+    assert_equal 0, stream.pos
+    stream.next
+    assert_equal 1, stream.pos
+  end
+
+  test "#next increases pos for multi-byte character" do
+    io = StringIO.new("♫")
+    stream = ECCSV::Stream.new(io)
+    assert_equal 0, stream.pos
+    stream.next
+    assert_equal 3, stream.pos
+  end
+
   test "#eof? returns true if at end" do
     io = StringIO.new("foo")
     stream = ECCSV::Stream.new(io)
