@@ -45,6 +45,8 @@ module ECCSV
       case type
       when :insert
         InsertCorrection
+      when :delete
+        DeleteCorrection
       else
         raise "invalid correction type: #{type.inspect}"
       end

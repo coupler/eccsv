@@ -24,6 +24,8 @@ module_eval(<<'...end parser.y/module_eval...', 'parser.y', 36)
       case type
       when :insert
         InsertCorrection
+      when :delete
+        DeleteCorrection
       else
         raise "invalid correction type: #{type.inspect}"
       end

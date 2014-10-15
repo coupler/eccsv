@@ -234,4 +234,11 @@ class TestParser < Test::Unit::TestCase
     result = parser.parse(%{foo,bar\n"foo})
     assert_equal [['foo', 'bar'], ['foo']], result
   end
+
+  test "single deletion correction" do
+    parser = ECCSV::Parser.new
+    parser.add_correction(1, 1, :delete, 1)
+    result = parser.parse(%{"foo,bar})
+    assert_equal [['foo', 'bar']], result
+  end
 end

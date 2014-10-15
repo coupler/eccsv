@@ -28,4 +28,15 @@ module ECCSV
       stream.insert(@string, @line, @col)
     end
   end
+
+  class DeleteCorrection < Correction
+    def initialize(line, col, amount)
+      super
+      @amount = amount
+    end
+
+    def apply(stream)
+      stream.delete(@amount, @line, @col)
+    end
+  end
 end
