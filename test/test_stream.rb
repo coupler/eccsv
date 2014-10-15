@@ -125,4 +125,23 @@ class TestStream < Test::Unit::TestCase
     assert_equal "o", stream.next
     assert_equal "o", stream.next
   end
+
+  test "#delete 1 character at line and col" do
+    io = StringIO.new("foo")
+    stream = ECCSV::Stream.new(io)
+    stream.delete(1, 1, 2)
+    assert_equal "f", stream.next
+    assert_equal "o", stream.next
+    assert stream.eof?
+  end
+
+  test "#delete 3 characters at line and col" do
+    io = StringIO.new("fbaroo")
+    stream = ECCSV::Stream.new(io)
+    stream.delete(3, 1, 2)
+    assert_equal "f", stream.next
+    assert_equal "o", stream.next
+    assert_equal "o", stream.next
+    assert stream.eof?
+  end
 end

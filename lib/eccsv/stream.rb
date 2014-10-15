@@ -8,6 +8,7 @@ module ECCSV
       @col = 1
       @pos = 0
       @inserts = Hash.new { |h, k| h[k] = {} }
+      @deletions = Hash.new { |h, k| h[k] = {} }
     end
 
     def peek
@@ -55,9 +56,17 @@ module ECCSV
       end
     end
 
+    def delete(len, line, col)
+      @deletions[line][col] = len
+    end
+
     private
 
     def getc
+      if @deletions.has_key?(@line) && @deletions[@line].has_key?(@col)
+        @io.seek(@deletions[@line][@col], IO::SEEK_CUR)
+      end
+
       if @inserts.has_key?(@line) && @inserts[@line].has_key?(@col)
         @inserts[@line][@col]
       else
