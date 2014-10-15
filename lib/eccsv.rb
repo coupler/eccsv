@@ -1,3 +1,4 @@
+require 'stringio'
 require 'eccsv/version'
 require 'eccsv/errors'
 require 'eccsv/correction'
