@@ -1,0 +1,10 @@
+{
+  "lib/eccsv/*.rb": {
+    "type": "source",
+    "alternate": "test/test_{}.rb"
+  },
+  "test/test_*.rb": {
+    "type": "test",
+    "alternate": "lib/eccsv/{}.rb"
+  }
+}

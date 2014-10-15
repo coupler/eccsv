@@ -104,6 +104,40 @@ parser.warnings[0].line #=> 2
 parser.warnings[0].col  #=> 4
 ```
 
+## Corrections
+
+It is possible to provide corrections to errors by inserting and deleting.
+
+### Examples
+
+#### Inserting
+
+```ruby
+require 'eccsv'
+
+data = <<EOF
+foo",bar
+EOF
+
+parser = ECCSV::Parser.new
+parser.add_correction(1, 1, :insert, '"')
+parser.parse(data)      #=> [["foo", "bar"]]]
+```
+
+#### Deleting
+
+```ruby
+require 'eccsv'
+
+data = <<EOF
+foo",bar
+EOF
+
+parser = ECCSV::Parser.new
+parser.add_correction(1, 4, :delete, 1)
+parser.parse(data)      #=> [["foo", "bar"]]]
+```
+
 ## Contributing
 
 1. Fork it
