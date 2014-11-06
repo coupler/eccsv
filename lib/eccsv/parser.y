@@ -54,8 +54,9 @@ module ECCSV
     @corrections << correction
   end
 
-  def parse(str)
-    @stream = Stream.new(StringIO.new(str))
+  def parse(arg)
+    io = arg.is_a?(String) ? StringIO.new(arg) : arg
+    @stream = Stream.new(io)
     @corrections.each do |correction|
       correction.apply(@stream)
     end

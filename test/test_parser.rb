@@ -241,4 +241,10 @@ class TestParser < Test::Unit::TestCase
     result = parser.parse(%{"foo,bar})
     assert_equal [['foo', 'bar']], result
   end
+
+  test "parsing IO" do
+    io = StringIO.new('foo')
+    parser = ECCSV::Parser.new
+    assert_equal [['foo']], parser.parse(io)
+  end
 end
